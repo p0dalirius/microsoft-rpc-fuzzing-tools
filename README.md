@@ -12,8 +12,8 @@
 ## Scripts 
 
  - [ListAvailablePipesOnRemoteMachine](./ListAvailablePipesOnRemoteMachine/): A script to list available SMB pipes remotely on a Windows machine through the IPC$ share.
-   +[x] List available SMB pipes through the share `IPC$`
-   +[x] Live mode to refresh list every seconds with `--live`
+   + [x] List available SMB pipes through the share `IPC$`
+   + [x] Live mode to refresh list every seconds with `--live`
 
 ## Contributing
 
