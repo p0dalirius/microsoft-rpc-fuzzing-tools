@@ -49,4 +49,4 @@ options:
 
 Here is a video demonstrating the `--live` option on [ListAvailablePipesOnRemoteMachine.py](ListAvailablePipesOnRemoteMachine.py):
 
-https://user-images.githubusercontent.com/79218792/178469180-5ce2c60a-259a-4531-af6e-4c3e8513dc33.mp4
+https://user-images.githubusercontent.com/79218792/178469623-e2236643-bd35-45a8-a803-2ddb1797fd97.mp4
