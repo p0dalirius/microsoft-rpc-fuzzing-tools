@@ -9,8 +9,40 @@ import argparse
 import datetime
 import sys
 import time
-
 from impacket.smbconnection import SMBConnection, SMB2_DIALECT_002, SMB2_DIALECT_21, SMB_DIALECT, SessionError
+from impacket.dcerpc.v5 import transport
+import sys
+
+
+def can_connect_to_pipe(target, pipe, targetIp=None, verbose=False):
+    ncan_target = r'ncacn_np:%s[%s]' % (target, pipe)
+    __rpctransport = transport.DCERPCTransportFactory(ncan_target)
+
+    if hasattr(__rpctransport, 'set_credentials'):
+        __rpctransport.set_credentials(username="", password="", domain="", lmhash="", nthash="")
+
+    if targetIp is not None:
+        __rpctransport.setRemoteHost(targetIp)
+
+    dce = __rpctransport.get_dce_rpc()
+    # dce.set_auth_type(RPC_C_AUTHN_WINNT)
+    # dce.set_auth_level(RPC_C_AUTHN_LEVEL_PKT_PRIVACY)
+
+    if verbose:
+        print("   [>] Connecting to %s ... " % ncan_target, end="")
+    sys.stdout.flush()
+    try:
+        dce.connect()
+    except Exception as e:
+        if verbose:
+            print("\x1b[1;91mfail\x1b[0m")
+            print("   [!] Something went wrong, check error status => %s" % str(e))
+        return None
+    else:
+        if verbose:
+            print("\x1b[1;92msuccess\x1b[0m")
+        return dce
+
 
 
 def list_remote_pipes(options, lmhash, nthash, share='IPC$', maxdepth=-1, debug=False):
@@ -64,8 +96,46 @@ def list_remote_pipes(options, lmhash, nthash, share='IPC$', maxdepth=-1, debug=
     return pipes
 
 
+def bruteforce_remote_pipes(options, debug=False):
+    known_pipes = [
+        r'\PIPE\atsvc',
+        r'\PIPE\efsrpc',
+        r'\PIPE\epmapper',
+        r'\PIPE\eventlog',
+        r'\PIPE\InitShutdown',
+        r'\PIPE\lsass',
+        r'\PIPE\lsarpc',
+        r'\PIPE\LSM_API_service',
+        r'\PIPE\netdfs',
+        r'\PIPE\netlogon',
+        r'\PIPE\ntsvcs',
+        r'\PIPE\PIPE_EVENTROOT\CIMV2SCM EVENT PROVIDER',
+        r'\PIPE\scerpc',
+        r'\PIPE\spoolss',
+        r'\PIPE\srvsvc',
+        r'\PIPE\VBoxTrayIPC-Administrator',
+        r'\PIPE\W32TIME_ALT',
+        r'\PIPE\wkssvc'
+    ]
+    known_pipes += [r'\PIPE\Winsock2\CatalogChangeListener-%03x-0' % k for k in range(0x1000)]
+    known_pipes += [r'\PIPE\RpcProxy\%d' % k for k in range(65536)]
+
+    found_pipes = []
+    k, maxi = 0, len(known_pipes)
+    for pipe in known_pipes:
+        k += 1
+        print("\x1b[2K[>] (%d/%d | %5.2f %%) Trying '%s'\r" % (k, maxi, round((k/maxi) * 100, 3), pipe), end="")
+        sys.stdout.flush()
+        if can_connect_to_pipe(options.target, pipe, verbose=options.verbose):
+            found_pipes.append(pipe)
+            print('\x1b[2K - %s' % pipe)
+
+    print("[+] Found %d pipes." % len(pipes))
+    return found_pipes
+
+
 def parseArgs():
-    print("ListAvailablePipesOnRemoteMachine v1.1 - by @podalirius_\n")
+    print("ListAvailablePipesOnRemoteMachine v1.2 - by @podalirius_\n")
 
     parser = argparse.ArgumentParser(add_help=True, description="A script to list available SMB pipes remotely on a Windows machine through the IPC$ share.")
 
@@ -106,7 +176,10 @@ if __name__ == '__main__':
     if options.live:
         try:
             print("[>] Listing created and deleted SMB pipes every second ... ")
-            pipes_after = list_remote_pipes(options, lmhash, nthash, debug=options.verbose)
+            if options.username == "":
+                pipes_after = bruteforce_remote_pipes(options, debug=options.verbose)
+            else:
+                pipes_after = list_remote_pipes(options, lmhash, nthash, debug=options.verbose)
             pipes_before = pipes_after[:]
             while True:
                 time.sleep(1)
@@ -123,7 +196,11 @@ if __name__ == '__main__':
             pass
     else:
         print("[>] Listing open SMB pipes ... ")
-        pipes = list_remote_pipes(options, lmhash, nthash, debug=options.verbose)
-        for f in pipes:
-            print(' - ', f)
-        print("[+] Found %d pipes." % len(pipes))
+        if options.username == "":
+            pipes = bruteforce_remote_pipes(options, debug=options.verbose)
+        else:
+            pipes = list_remote_pipes(options, lmhash, nthash, debug=options.verbose)
+            for f in pipes:
+                print(' - ', f)
+            print("[+] Found %d pipes." % len(pipes))
+
