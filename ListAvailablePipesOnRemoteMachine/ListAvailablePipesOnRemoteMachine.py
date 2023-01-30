@@ -139,12 +139,14 @@ def parseArgs():
 
     parser = argparse.ArgumentParser(add_help=True, description="A script to list available SMB pipes remotely on a Windows machine through the IPC$ share.")
 
-    parser.add_argument("-u", "--username", default="", help="Username to authenticate to the endpoint.")
-    parser.add_argument("-p", "--password", default="", help="Password to authenticate to the endpoint. (if omitted, it will be asked unless -no-pass is specified)")
-    parser.add_argument("-d", "--domain", default="", help="Windows domain name to authenticate to the endpoint.")
-    parser.add_argument("--hashes", action="store", metavar="[LMHASH]:NTHASH", help="NT/LM hashes (LM hash can be empty)")
-    parser.add_argument("--no-pass", action="store_true", help="Don't ask for password (useful for -k)")
-    parser.add_argument("-k", "--kerberos", action="store_true", help="Use Kerberos authentication. Grabs credentials from ccache file (KRB5CCNAME) based on target parameters. If valid credentials cannot be found, it will use the ones specified in the command line")
+    group_creds = parser.add_argument_group('Credentials')
+    group_creds.add_argument("-u", "--username", default="", help="Username to authenticate to the endpoint.")
+    group_creds.add_argument("-p", "--password", default="", help="Password to authenticate to the endpoint. (if omitted, it will be asked unless -no-pass is specified)")
+    group_creds.add_argument("-d", "--domain", default="", help="Windows domain name to authenticate to the endpoint.")
+    group_creds.add_argument("--hashes", action="store", metavar="[LMHASH]:NTHASH", help="NT/LM hashes (LM hash can be empty)")
+    group_creds.add_argument("--no-pass", action="store_true", help="Don't ask for password (useful for -k)")
+    group_creds.add_argument("-k", "--kerberos", action="store_true", help="Use Kerberos authentication. Grabs credentials from ccache file (KRB5CCNAME) based on target parameters. If valid credentials cannot be found, it will use the ones specified in the command line")
+
     parser.add_argument("--target", action="store", metavar="ip address", help="Target machine.")
     parser.add_argument("--target-ip", action="store", metavar="ip address", help="IP Address of the target machine. If omitted it will use whatever was specified as target. This is useful when target is the NetBIOS name or Kerberos name and you cannot resolve it")
     parser.add_argument("-P", "--port", choices=["139", "445"], nargs="?", default="445", metavar="destination port", help="Destination port to connect to SMB Server")
