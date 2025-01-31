@@ -135,7 +135,7 @@ def bruteforce_remote_pipes(options, debug=False):
 
 
 def parseArgs():
-    print("ListAvailablePipesOnRemoteMachine v1.2 - by @podalirius_\n")
+    print("ListAvailablePipesOnRemoteMachine v1.2 - by Remi GASCOU (Podalirius)\n")
 
     parser = argparse.ArgumentParser(add_help=True, description="A script to list available SMB pipes remotely on a Windows machine through the IPC$ share.")
 

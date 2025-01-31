@@ -39,7 +39,7 @@ Function ShowHelp {
 }
 
 
-Write-Host "ListAvailablePipesOnRemoteMachine v1.1 - by @podalirius_"
+Write-Host "ListAvailablePipesOnRemoteMachine v1.1 - by Remi GASCOU (Podalirius)"
 Write-Host ""
 
 If ($Help) {

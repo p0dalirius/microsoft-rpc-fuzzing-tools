@@ -190,7 +190,7 @@ def print_results_live(results_before, results_now):
 
 
 def parseArgs():
-    print("ListRPCEndpointsOnRemoteMachine v1.2 - by @podalirius_\n")
+    print("ListRPCEndpointsOnRemoteMachine v1.2 - by Remi GASCOU (Podalirius)\n")
 
     parser = argparse.ArgumentParser(add_help=True, description="A script to list available SMB pipes remotely on a Windows machine through the IPC$ share.")
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose mode. (default: False)")
